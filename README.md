@@ -107,7 +107,4 @@ It serves as an academic DBMS project showcasing proper backend database structu
 
 Manahil Rizvi
 BS Computer Science (UCP) 
-5th Semester 
----
-
-## 📄 Contents of This Reposi
+5th Semester
