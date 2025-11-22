@@ -1,0 +1,114 @@
+CREATE DATABASE IF NOT EXISTS movie_system;
+USE movie_system;
+
+-- ==========================
+-- 1. USERS TABLE
+-- ==========================
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    preferences VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================
+-- 2. GENRES TABLE
+-- ==========================
+CREATE TABLE genres (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- ==========================
+-- 3. MOVIES TABLE
+-- ==========================
+CREATE TABLE movies (
+    movie_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    release_year YEAR,
+    director VARCHAR(120),
+    genre_id INT,
+    CONSTRAINT fk_movie_genre
+        FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+-- ==========================
+-- 4. REVIEWS TABLE
+-- ==========================
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    review_text TEXT,
+    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_review_user 
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_review_movie 
+        FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+        ON DELETE CASCADE
+);
+
+-- ==========================
+-- 5. RATINGS TABLE
+-- ==========================
+CREATE TABLE ratings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    rating_value DECIMAL(3,1) CHECK (rating_value >= 0 AND rating_value <= 10),
+    rated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_rating_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_rating_movie
+        FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+        ON DELETE CASCADE
+);
+
+-- ==========================
+-- 6. WATCHLIST TABLE
+-- ==========================
+CREATE TABLE watchlists (
+    watchlist_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    movie_id INT NOT NULL,
+    status ENUM('Planned', 'Watching', 'Completed') DEFAULT 'Planned',
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_watchlist_user
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_watchlist_movie
+        FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+        ON DELETE CASCADE
+);
+
+INSERT INTO genres (genre_name) VALUES
+('Action'), ('Comedy'), ('Drama'), ('Sci-Fi'), ('Horror');
+
+INSERT INTO users (username, email, preferences) VALUES
+('manahil_rizvi', 'manahil@example.com', 'Action, Sci-Fi'),
+('john_doe', 'john@example.com', 'Comedy, Drama');
+
+INSERT INTO movies (title, release_year, director, genre_id) VALUES
+('Inception', 2010, 'Christopher Nolan', 4),
+('Avengers: Endgame', 2019, 'Russo Brothers', 1),
+('The Conjuring', 2013, 'James Wan', 5);
+
+INSERT INTO ratings (user_id, movie_id, rating_value) VALUES
+(1, 1, 9.5),
+(2, 2, 8.8);
+
+INSERT INTO reviews (user_id, movie_id, review_text) VALUES
+(1, 1, 'Amazing movie with a brilliant concept!'),
+(2, 2, 'Great action and story progression.');
+
+INSERT INTO watchlists (user_id, movie_id, status) VALUES
+(1, 2, 'Planned'),
+(2, 3, 'Completed');
